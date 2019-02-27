@@ -35,7 +35,7 @@ public class AuthorizationFilter extends GenericFilterBean {
 			
 			TokenDTO tokenDTO = authorizationService.getTokenInfo(token);
 			
-			if (tokenDTO != null && tokenDTO.isActive()) {
+			if (tokenDTO != null) {
 				
 				SecurityContextHolder.getContext()
 										.setAuthentication(tokenDTO.getAuthentication());

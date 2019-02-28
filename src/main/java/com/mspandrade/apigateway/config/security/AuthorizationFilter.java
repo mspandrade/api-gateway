@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.mspandrade.apigateway.dto.TokenDTO;
+import com.mspandrade.apigateway.intercept.header.UserInformatinHeaderHandle;
 import com.mspandrade.apigateway.service.AuthorizationService;
 
 public class AuthorizationFilter extends GenericFilterBean {
@@ -29,13 +30,21 @@ public class AuthorizationFilter extends GenericFilterBean {
 			throws IOException, ServletException {
 		
         HttpServletResponse response = (HttpServletResponse) res;
-        String token = AuthorizationService.resolveToken((HttpServletRequest) req);
+        HttpServletRequest request = (HttpServletRequest) req;
+        
+        String token = AuthorizationService.resolveToken(request);
         
 		if (token != null) {
 			
 			TokenDTO tokenDTO = authorizationService.getTokenInfo(token);
 			
 			if (tokenDTO != null) {
+				
+				UserInformatinHeaderHandle requestHandle = new UserInformatinHeaderHandle(request);
+				
+				requestHandle.setUsername(tokenDTO.getUsername());
+				
+				request = requestHandle;
 				
 				SecurityContextHolder.getContext()
 										.setAuthentication(tokenDTO.getAuthentication());
@@ -48,8 +57,7 @@ public class AuthorizationFilter extends GenericFilterBean {
 				throw e;
 			}
         }
-		chain.doFilter(req, res);	
-		
+		chain.doFilter(request, res);
 	}
 	
 }
